@@ -1,5 +1,9 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createProduct, deleteProduct } from './actions';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ProductForm } from '@/components/forms/product-form';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { deleteProduct } from './actions';
 
 export default async function ProductsPage({
   searchParams
@@ -33,93 +37,59 @@ export default async function ProductsPage({
       </header>
 
       {stores?.length ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-lg font-semibold">Create product</h2>
-          <form className="mt-4 grid gap-4 md:grid-cols-4" action={createProduct}>
-            <input type="hidden" name="store_id" value={activeStoreId} />
-            <div className="md:col-span-2">
-              <label className="text-sm font-medium" htmlFor="name">
-                Name
-              </label>
-              <input
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                id="name"
-                name="name"
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium" htmlFor="price">
-                Price
-              </label>
-              <input
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                id="price"
-                name="price"
-                type="number"
-                min="0"
-                step="0.01"
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium" htmlFor="status">
-                Status
-              </label>
-              <select
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                id="status"
-                name="status"
-              >
-                <option value="draft">Draft</option>
-                <option value="active">Active</option>
-              </select>
-            </div>
-            <button
-              className="md:col-span-4 w-full rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-              type="submit"
-            >
-              Add product
-            </button>
-          </form>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Create product</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {activeStoreId ? <ProductForm storeId={activeStoreId} /> : null}
+          </CardContent>
+        </Card>
       ) : (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-sm text-slate-600">
-          Create a store first to manage products.
-        </div>
+        <Card>
+          <CardContent className="text-sm text-slate-600">
+            Create a store first to manage products.
+          </CardContent>
+        </Card>
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="text-lg font-semibold">Catalog</h2>
-        <div className="mt-4 space-y-3">
+      <Card>
+        <CardHeader>
+          <CardTitle>Catalog</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
           {products?.length ? (
             products.map((product) => (
               <div
                 key={product.id}
-                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 px-4 py-3"
               >
                 <div>
                   <p className="font-medium">{product.name}</p>
                   <p className="text-sm text-slate-500">
-                    {product.currency} {product.price} · {product.status}
+                    {product.currency} {product.price}
                   </p>
                 </div>
-                <form action={deleteProduct}>
-                  <input type="hidden" name="product_id" value={product.id} />
-                  <button
-                    className="text-sm font-semibold text-red-600 hover:text-red-700"
-                    type="submit"
-                  >
-                    Delete
-                  </button>
-                </form>
+                <div className="flex items-center gap-3">
+                  <Badge variant={product.status === 'active' ? 'success' : 'warning'}>
+                    {product.status}
+                  </Badge>
+                  <form action={deleteProduct}>
+                    <input type="hidden" name="product_id" value={product.id} />
+                    <Button variant="ghost" size="sm" type="submit">
+                      Delete
+                    </Button>
+                  </form>
+                </div>
               </div>
             ))
           ) : (
-            <p className="text-sm text-slate-500">No products yet.</p>
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
+              No products yet. Add your first product above.
+            </div>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }

@@ -3,9 +3,15 @@
 import { z } from 'zod';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
+export type StoreFormState = {
+  error?: string | null;
+  success?: boolean;
+  fieldErrors?: Record<string, string[]>;
+};
+
 const storeSchema = z.object({
-  name: z.string().min(2),
-  slug: z.string().min(2),
+  name: z.string().min(2, 'Store name is required.'),
+  slug: z.string().min(2, 'Store slug is required.'),
   description: z.string().optional()
 });
 
@@ -17,7 +23,10 @@ function slugify(value: string) {
     .replace(/(^-|-$)+/g, '');
 }
 
-export async function createStore(formData: FormData) {
+export async function createStore(
+  _prevState: StoreFormState,
+  formData: FormData
+): Promise<StoreFormState> {
   const parsed = storeSchema.safeParse({
     name: formData.get('name'),
     slug: formData.get('slug'),
@@ -25,7 +34,11 @@ export async function createStore(formData: FormData) {
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.message };
+    return {
+      error: 'Please fix the errors below.',
+      success: false,
+      fieldErrors: parsed.error.flatten().fieldErrors
+    };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -34,7 +47,7 @@ export async function createStore(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: 'Unauthorized' };
+    return { error: 'Unauthorized', success: false };
   }
 
   const { data: store, error } = await supabase
@@ -49,7 +62,7 @@ export async function createStore(formData: FormData) {
     .single();
 
   if (error) {
-    return { error: error.message };
+    return { error: error.message, success: false };
   }
 
   const { error: memberError } = await supabase.from('store_members').insert({
@@ -59,8 +72,8 @@ export async function createStore(formData: FormData) {
   });
 
   if (memberError) {
-    return { error: memberError.message };
+    return { error: memberError.message, success: false };
   }
 
-  return { success: true };
+  return { error: null, success: true };
 }

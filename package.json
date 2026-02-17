@@ -19,6 +19,7 @@
     "zod": "latest"
   },
   "devDependencies": {
+    "@faker-js/faker": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",

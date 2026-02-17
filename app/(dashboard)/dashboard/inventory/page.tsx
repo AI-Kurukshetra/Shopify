@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default async function InventoryPage() {
   const supabase = await createSupabaseServerClient();
@@ -14,13 +15,16 @@ export default async function InventoryPage() {
         <h1 className="text-2xl font-semibold">Inventory</h1>
         <p className="text-sm text-slate-600">Monitor stock levels.</p>
       </header>
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        {inventory?.length ? (
-          <div className="space-y-3">
-            {inventory.map((item) => (
+      <Card>
+        <CardHeader>
+          <CardTitle>Stock overview</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {inventory?.length ? (
+            inventory.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 px-4 py-3"
               >
                 <div>
                   <p className="font-medium">{item.product?.name}</p>
@@ -28,12 +32,14 @@ export default async function InventoryPage() {
                 </div>
                 <p className="text-sm font-semibold">{item.quantity}</p>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-slate-500">No inventory items yet.</p>
-        )}
-      </div>
+            ))
+          ) : (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
+              No inventory items yet.
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </section>
   );
 }

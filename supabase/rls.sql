@@ -1,38 +1,57 @@
 create or replace function public.is_admin()
-returns boolean as $$
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
   select exists (
     select 1 from public.user_roles
     where user_id = auth.uid() and role = 'admin'
   );
-$$ language sql stable;
+$$;
 
 create or replace function public.is_store_member(store_id uuid)
-returns boolean as $$
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
   select exists (
     select 1 from public.store_members
     where store_members.store_id = is_store_member.store_id
       and store_members.user_id = auth.uid()
   );
-$$ language sql stable;
+$$;
 
 create or replace function public.is_store_owner(store_id uuid)
-returns boolean as $$
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
   select exists (
-    select 1 from public.store_members
-    where store_members.store_id = is_store_owner.store_id
-      and store_members.user_id = auth.uid()
-      and store_members.role = 'store_owner'
+    select 1 from public.stores
+    where stores.id = is_store_owner.store_id
+      and stores.owner_id = auth.uid()
   );
-$$ language sql stable;
+$$;
 
 create or replace function public.is_store_public(store_id uuid)
-returns boolean as $$
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
   select exists (
     select 1 from public.stores
     where stores.id = is_store_public.store_id
       and stores.is_public = true
   );
-$$ language sql stable;
+$$;
 
 alter table public.users enable row level security;
 alter table public.user_roles enable row level security;
@@ -48,6 +67,8 @@ alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
 alter table public.payments enable row level security;
 alter table public.subscriptions enable row level security;
+alter table public.carts enable row level security;
+alter table public.cart_items enable row level security;
 
 -- Users
 create policy "Users can view own profile"
@@ -84,15 +105,11 @@ create policy "Store owners can delete stores"
 -- Store members
 create policy "Members can view membership"
   on public.store_members for select
-  using (public.is_store_member(store_id) or public.is_admin());
+  using (user_id = auth.uid() or public.is_store_owner(store_id) or public.is_admin());
 
 create policy "Owners manage members"
   on public.store_members for insert
-  with check (
-    public.is_store_owner(store_id)
-    or public.is_admin()
-    or auth.uid() = (select owner_id from public.stores where id = store_id)
-  );
+  with check (public.is_store_owner(store_id) or public.is_admin());
 
 create policy "Owners update members"
   on public.store_members for update
@@ -216,6 +233,16 @@ create policy "Orders readable by store members or customer"
     )
   );
 
+create policy "Customers can create orders"
+  on public.orders for insert
+  with check (
+    exists (
+      select 1 from public.customers
+      where customers.id = orders.customer_id
+        and customers.user_id = auth.uid()
+    )
+  );
+
 create policy "Store members manage orders"
   on public.orders for all
   using (public.is_store_member(store_id) or public.is_admin())
@@ -232,6 +259,17 @@ create policy "Order items readable by store members or customer"
     or exists (
       select 1 from public.customers
       join public.orders on orders.customer_id = customers.id
+      where orders.id = order_items.order_id
+        and customers.user_id = auth.uid()
+    )
+  );
+
+create policy "Customers can create order items"
+  on public.order_items for insert
+  with check (
+    exists (
+      select 1 from public.orders
+      join public.customers on customers.id = orders.customer_id
       where orders.id = order_items.order_id
         and customers.user_id = auth.uid()
     )
@@ -268,11 +306,66 @@ create policy "Store members manage payments"
     or public.is_admin()
   );
 
+create policy "Customers can create payments"
+  on public.payments for insert
+  with check (
+    exists (
+      select 1 from public.orders
+      join public.customers on customers.id = orders.customer_id
+      where orders.id = payments.order_id
+        and customers.user_id = auth.uid()
+    )
+  );
+
 -- Subscriptions
 create policy "Store owners manage subscriptions"
   on public.subscriptions for all
   using (public.is_store_owner(store_id) or public.is_admin())
   with check (public.is_store_owner(store_id) or public.is_admin());
+
+-- Carts
+create policy "Customers manage own carts"
+  on public.carts for all
+  using (
+    exists (
+      select 1 from public.customers
+      where customers.id = carts.customer_id
+        and customers.user_id = auth.uid()
+    )
+    or public.is_store_member(store_id)
+    or public.is_admin()
+  )
+  with check (
+    exists (
+      select 1 from public.customers
+      where customers.id = carts.customer_id
+        and customers.user_id = auth.uid()
+    )
+    or public.is_store_member(store_id)
+    or public.is_admin()
+  );
+
+-- Cart items
+create policy "Customers manage own cart items"
+  on public.cart_items for all
+  using (
+    exists (
+      select 1 from public.carts
+      join public.customers on customers.id = carts.customer_id
+      where carts.id = cart_items.cart_id
+        and customers.user_id = auth.uid()
+    )
+    or public.is_admin()
+  )
+  with check (
+    exists (
+      select 1 from public.carts
+      join public.customers on customers.id = carts.customer_id
+      where carts.id = cart_items.cart_id
+        and customers.user_id = auth.uid()
+    )
+    or public.is_admin()
+  );
 
 -- Storage bucket policies
 insert into storage.buckets (id, name, public)

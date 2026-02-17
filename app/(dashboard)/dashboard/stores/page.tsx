@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createStore } from './actions';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StoreForm } from '@/components/forms/store-form';
+import { Badge } from '@/components/ui/badge';
 
 export default async function StoresPage() {
   const supabase = await createSupabaseServerClient();
@@ -18,78 +20,50 @@ export default async function StoresPage() {
         </p>
       </header>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="text-lg font-semibold">Create store</h2>
-        <form className="mt-4 grid gap-4 md:grid-cols-2" action={createStore}>
-          <div>
-            <label className="text-sm font-medium" htmlFor="name">
-              Store name
-            </label>
-            <input
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              id="name"
-              name="name"
-              required
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium" htmlFor="slug">
-              Store slug
-            </label>
-            <input
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              id="slug"
-              name="slug"
-              placeholder="acme-shop"
-              required
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="text-sm font-medium" htmlFor="description">
-              Description
-            </label>
-            <textarea
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              id="description"
-              name="description"
-              rows={3}
-            />
-          </div>
-          <button
-            className="md:col-span-2 w-full rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-            type="submit"
-          >
-            Create store
-          </button>
-        </form>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Create store</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StoreForm />
+        </CardContent>
+      </Card>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="text-lg font-semibold">Your stores</h2>
-        <div className="mt-4 space-y-3">
+      <Card>
+        <CardHeader>
+          <CardTitle>Your stores</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
           {stores?.length ? (
             stores.map((store) => (
               <div
                 key={store.id}
-                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 px-4 py-3"
               >
                 <div>
                   <p className="font-medium">{store.name}</p>
                   <p className="text-sm text-slate-500">/{store.slug}</p>
                 </div>
-                <Link
-                  className="text-sm font-semibold text-brand-600 hover:text-brand-700"
-                  href={`/${store.slug}`}
-                >
-                  View store
-                </Link>
+                <div className="flex items-center gap-3">
+                  <Badge variant={store.is_public ? 'success' : 'warning'}>
+                    {store.is_public ? 'Public' : 'Private'}
+                  </Badge>
+                  <Link
+                    className="text-sm font-semibold text-primary hover:text-primary/80"
+                    href={`/${store.slug}`}
+                  >
+                    View store
+                  </Link>
+                </div>
               </div>
             ))
           ) : (
-            <p className="text-sm text-slate-500">No stores created yet.</p>
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
+              No stores created yet.
+            </div>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }

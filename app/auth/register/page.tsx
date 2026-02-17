@@ -1,83 +1,84 @@
 import Link from 'next/link';
 import { signUp } from '../actions';
+import { Alert } from '@/components/ui/alert';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { FormField } from '@/components/ui/form-field';
+import { SubmitButton } from '@/components/ui/submit-button';
 
 export default function RegisterPage({
   searchParams
 }: {
   searchParams?: { error?: string; message?: string };
 }) {
+  const hasError = Boolean(searchParams?.error);
+
   return (
     <main className="min-h-screen bg-slate-50">
       <section className="container flex min-h-screen items-center justify-center py-12">
-        <div className="w-full max-w-md space-y-6 rounded-2xl bg-white p-8 shadow">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold">Create your store</h1>
+        <Card className="w-full max-w-md shadow-soft">
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                Create a store
+              </p>
+              <h1 className="text-2xl font-semibold">Launch your storefront</h1>
+              <p className="text-sm text-slate-500">
+                Set up a new account in minutes.
+              </p>
+            </div>
+            {searchParams?.error ? (
+              <Alert variant="error" title="Registration failed">
+                {searchParams.error}
+              </Alert>
+            ) : null}
+            {searchParams?.message ? (
+              <Alert variant="success" title="Success">
+                {searchParams.message}
+              </Alert>
+            ) : null}
+            <form className="space-y-4" action={signUp}>
+              <FormField label="Full name" htmlFor="full_name">
+                <Input id="full_name" name="full_name" type="text" required />
+              </FormField>
+              <FormField
+                label="Email"
+                htmlFor="email"
+                error={hasError ? 'Enter a valid email address.' : undefined}
+              >
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  hasError={hasError}
+                />
+              </FormField>
+              <FormField
+                label="Password"
+                htmlFor="password"
+                hint="Use at least 8 characters."
+                error={hasError ? 'Check your password and try again.' : undefined}
+              >
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={8}
+                  hasError={hasError}
+                />
+              </FormField>
+              <SubmitButton className="w-full">Create account</SubmitButton>
+            </form>
             <p className="text-sm text-slate-500">
-              Sign up to launch a new storefront.
+              Already have an account?{' '}
+              <Link className="font-semibold text-primary hover:text-primary/80" href="/auth/login">
+                Sign in
+              </Link>
             </p>
-          </div>
-          {searchParams?.error ? (
-            <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">
-              {searchParams.error}
-            </p>
-          ) : null}
-          {searchParams?.message ? (
-            <p className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">
-              {searchParams.message}
-            </p>
-          ) : null}
-          <form className="space-y-4" action={signUp}>
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="full_name">
-                Full name
-              </label>
-              <input
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                id="full_name"
-                name="full_name"
-                type="text"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="email">
-                Email
-              </label>
-              <input
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                id="email"
-                name="email"
-                type="email"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="password">
-                Password
-              </label>
-              <input
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                id="password"
-                name="password"
-                type="password"
-                required
-                minLength={8}
-              />
-            </div>
-            <button
-              className="w-full rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-              type="submit"
-            >
-              Create account
-            </button>
-          </form>
-          <p className="text-sm text-slate-500">
-            Already have an account?{' '}
-            <Link className="text-brand-600 hover:text-brand-700" href="/auth/login">
-              Sign in
-            </Link>
-          </p>
-        </div>
+          </CardContent>
+        </Card>
       </section>
     </main>
   );

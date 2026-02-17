@@ -3,12 +3,18 @@
 import { z } from 'zod';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
+export type ProductFormState = {
+  error?: string | null;
+  success?: boolean;
+  fieldErrors?: Record<string, string[]>;
+};
+
 const productSchema = z.object({
   store_id: z.string().uuid(),
-  name: z.string().min(2),
-  price: z.coerce.number().min(0),
+  name: z.string().min(2, 'Product name is required.'),
+  price: z.coerce.number().min(0, 'Price must be positive.'),
   currency: z.string().min(3).max(3).default('USD'),
-  status: z.enum(['draft', 'active']).default('draft')
+  status: z.enum(['draft', 'active']).default('active')
 });
 
 function slugify(value: string) {
@@ -19,7 +25,10 @@ function slugify(value: string) {
     .replace(/(^-|-$)+/g, '');
 }
 
-export async function createProduct(formData: FormData) {
+export async function createProduct(
+  _prevState: ProductFormState,
+  formData: FormData
+): Promise<ProductFormState> {
   const parsed = productSchema.safeParse({
     store_id: formData.get('store_id'),
     name: formData.get('name'),
@@ -29,7 +38,11 @@ export async function createProduct(formData: FormData) {
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.message };
+    return {
+      error: 'Please fix the errors below.',
+      success: false,
+      fieldErrors: parsed.error.flatten().fieldErrors
+    };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -43,10 +56,10 @@ export async function createProduct(formData: FormData) {
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: error.message, success: false };
   }
 
-  return { success: true };
+  return { error: null, success: true };
 }
 
 export async function deleteProduct(formData: FormData) {

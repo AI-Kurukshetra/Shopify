@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 export async function signIn(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '').trim();
+  const redirectTo = String(formData.get('redirect_to') ?? '').trim();
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword({
@@ -17,7 +18,7 @@ export async function signIn(formData: FormData) {
     redirect(`/auth/login?error=${encodeURIComponent(error.message)}`);
   }
 
-  redirect('/dashboard');
+  redirect(redirectTo || '/dashboard');
 }
 
 export async function signUp(formData: FormData) {

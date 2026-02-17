@@ -1,10 +1,17 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user }
   } = await supabase.auth.getUser();
+
+  const stats = [
+    { label: 'Revenue', value: '--' },
+    { label: 'Orders', value: '--' },
+    { label: 'Active products', value: '--' }
+  ];
 
   return (
     <section className="space-y-6">
@@ -15,14 +22,17 @@ export default async function DashboardPage() {
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
-        {['Revenue', 'Orders', 'Active products'].map((label) => (
-          <div
-            key={label}
-            className="rounded-xl border border-slate-200 bg-white p-5"
-          >
-            <p className="text-sm text-slate-500">{label}</p>
-            <p className="mt-2 text-2xl font-semibold">--</p>
-          </div>
+        {stats.map((stat) => (
+          <Card key={stat.label}>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-slate-500">
+                {stat.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-semibold text-slate-900">{stat.value}</p>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </section>

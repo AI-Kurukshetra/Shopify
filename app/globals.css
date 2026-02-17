@@ -1,17 +1,122 @@
+@config "../tailwind.config.ts";
 @import "tailwindcss";
 
 :root {
   color-scheme: light;
+  --color-bg: 255 255 255;
+  --color-surface: 255 255 255;
+  --color-text: 17 17 17;
+  --color-muted: 107 114 128;
+  --color-border: 229 231 235;
+  --color-primary: 249 115 22;
+  --color-primary-foreground: 255 255 255;
+  --color-secondary: 17 17 17;
+  --color-secondary-foreground: 255 255 255;
+  --color-accent: 219 234 254;
+  --pattern-dot: rgba(59, 130, 246, 0.08);
+  --pattern-dot-strong: rgba(59, 130, 246, 0.12);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: 10 10 10;
+  --color-surface: 17 17 17;
+  --color-text: 243 244 246;
+  --color-muted: 148 163 184;
+  --color-border: 39 39 42;
+  --color-primary: 249 115 22;
+  --color-primary-foreground: 255 255 255;
+  --color-secondary: 255 255 255;
+  --color-secondary-foreground: 10 10 10;
+  --color-accent: 30 58 138;
+  --pattern-dot: rgba(59, 130, 246, 0.02);
+  --pattern-dot-strong: rgba(59, 130, 246, 0.04);
+}
+
+:root[data-theme='dark'] body {
+  background-image: linear-gradient(180deg, #0a0a0a 0%, #0f0f0f 100%);
+  background-size: 100% 100%;
 }
 
 @layer base {
   body {
-    @apply bg-white text-slate-900 antialiased;
+    @apply text-foreground antialiased;
+    font-family: var(--font-sans);
+    background-color: rgb(var(--color-bg));
+    background-image:
+      radial-gradient(circle at 1px 1px, var(--pattern-dot) 1px, transparent 0),
+      radial-gradient(circle at 1px 1px, var(--pattern-dot-strong) 1px, transparent 0),
+      linear-gradient(180deg, #ffffff 0%, #f9fafb 40%, #ffffff 100%);
+    background-size: 28px 28px, 84px 84px, 100% 100%;
+    background-attachment: fixed;
+    transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    @apply transition-colors duration-200;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary/50 ring-offset-2 ring-offset-background;
   }
 }
 
 @layer components {
   .container {
     @apply mx-auto w-full max-w-6xl px-4;
+  }
+}
+
+@layer utilities {
+  .bg-white {
+    background-color: rgb(var(--color-surface));
+  }
+  .bg-slate-50 {
+    background-color: rgb(var(--color-surface));
+  }
+  .bg-slate-100 {
+    background-color: rgb(var(--color-surface));
+  }
+  .border-slate-200 {
+    border-color: rgb(var(--color-border));
+  }
+  .border-slate-300 {
+    border-color: rgb(var(--color-border));
+  }
+  .border-slate-400 {
+    border-color: rgb(var(--color-border));
+  }
+  .text-slate-900,
+  .text-slate-800 {
+    color: rgb(var(--color-text));
+  }
+  .text-slate-700 {
+    color: rgb(var(--color-muted));
+  }
+  .text-slate-600,
+  .text-slate-500 {
+    color: rgb(var(--color-muted));
+  }
+  .text-slate-400 {
+    color: rgb(var(--color-muted));
   }
 }
