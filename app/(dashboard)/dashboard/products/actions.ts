@@ -62,14 +62,8 @@ export async function createProduct(
   return { error: null, success: true };
 }
 
-export async function deleteProduct(formData: FormData) {
+export async function deleteProduct(formData: FormData): Promise<void> {
   const productId = String(formData.get('product_id') ?? '');
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from('products').delete().eq('id', productId);
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  return { success: true };
+  await supabase.from('products').delete().eq('id', productId);
 }
