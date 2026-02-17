@@ -182,13 +182,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       if (!items?.length) return;
 
-      const mapped = items.map((item) => ({
-        id: item.product_id,
-        name: item.product?.name ?? 'Product',
-        slug: item.product?.slug ?? '',
-        price: Number(item.unit_price),
-        quantity: item.quantity
-      }));
+      type CartItemRow = {
+        product_id: string;
+        quantity: number;
+        unit_price: number | string;
+        product?: { name: string; slug: string } | { name: string; slug: string }[] | null;
+      };
+
+      const mapped = (items as CartItemRow[]).map((item) => {
+        const product = Array.isArray(item.product) ? item.product[0] : item.product;
+        return {
+          id: item.product_id,
+          name: product?.name ?? 'Product',
+          slug: product?.slug ?? '',
+          price: Number(item.unit_price),
+          quantity: item.quantity
+        };
+      });
 
       setState((prev) => ({
         ...prev,
