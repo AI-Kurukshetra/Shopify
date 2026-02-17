@@ -52,6 +52,25 @@ export function OrderHistory({
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  type OrderItemRow = {
+    id: string;
+    quantity: number;
+    unit_price: number;
+    total: number;
+    product?: { name: string; slug: string } | { name: string; slug: string }[] | null;
+  };
+
+  type OrderRow = {
+    id: string;
+    order_number: string;
+    status: string;
+    payment_status: string;
+    total: number;
+    currency: string;
+    created_at: string;
+    order_items: OrderItemRow[];
+  };
+
   useEffect(() => {
     let active = true;
     const load = async () => {
@@ -85,7 +104,17 @@ export function OrderHistory({
       if (ordersError) {
         setError(ordersError.message);
       } else {
-        setOrders((data ?? []) as Order[]);
+        const mapped = ((data ?? []) as OrderRow[]).map((order) => ({
+          ...order,
+          order_items: (order.order_items ?? []).map((item) => {
+            const product = Array.isArray(item.product) ? item.product[0] : item.product;
+            return {
+              ...item,
+              product: product ? { name: product.name, slug: product.slug } : null
+            } as OrderItem;
+          })
+        }));
+        setOrders(mapped);
       }
       setLoading(false);
     };
