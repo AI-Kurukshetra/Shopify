@@ -43,6 +43,12 @@ export default async function AnalyticsPage() {
     .select('id', { count: 'exact', head: true })
     .in('store_id', storeIds);
 
+  type OrderItemRow = {
+    product_id: string | null;
+    quantity: number | null;
+    product?: { name: string } | { name: string }[] | null;
+  };
+
   const { data: orderItems } = await supabase
     .from('order_items')
     .select('product_id, quantity, product:products(name)')
@@ -51,11 +57,14 @@ export default async function AnalyticsPage() {
   const topProduct = (() => {
     if (!orderItems?.length) return null;
     const totals = new Map();
-    for (const item of orderItems) {
+    for (const item of orderItems as OrderItemRow[]) {
       if (!item.product_id) continue;
+      const productName = Array.isArray(item.product)
+        ? item.product[0]?.name
+        : item.product?.name;
       const current = totals.get(item.product_id) ?? {
         quantity: 0,
-        name: item.product?.name ?? 'Product'
+        name: productName ?? 'Product'
       };
       totals.set(item.product_id, {
         quantity: current.quantity + (item.quantity ?? 0),
