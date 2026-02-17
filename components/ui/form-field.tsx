@@ -19,7 +19,7 @@ export function FormField({
   const describedBy = error ? `${htmlFor}-error` : hint ? `${htmlFor}-hint` : undefined;
 
   const content = React.isValidElement(children)
-    ? React.cloneElement(children, {
+    ? React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
         id: htmlFor,
         'aria-describedby': describedBy,
         'aria-invalid': Boolean(error)
