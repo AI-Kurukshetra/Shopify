@@ -3,7 +3,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createStore } from './actions';
 
 export default async function StoresPage() {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { data: stores } = await supabase
     .from('stores')
     .select('id, name, slug, is_public')

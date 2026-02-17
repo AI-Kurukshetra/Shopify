@@ -7,7 +7,7 @@ export async function signIn(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '').trim();
 
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password
@@ -25,7 +25,7 @@ export async function signUp(formData: FormData) {
   const password = String(formData.get('password') ?? '').trim();
   const fullName = String(formData.get('full_name') ?? '').trim();
 
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signUp({
     email,
     password,
@@ -45,7 +45,7 @@ export async function signUp(formData: FormData) {
 }
 
 export async function signOut() {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
   redirect('/');
 }

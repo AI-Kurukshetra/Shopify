@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export default async function InventoryPage() {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { data: inventory } = await supabase
     .from('inventory')
     .select('id, sku, quantity, product:products(name)')

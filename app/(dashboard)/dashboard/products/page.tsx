@@ -6,7 +6,7 @@ export default async function ProductsPage({
 }: {
   searchParams?: { store?: string };
 }) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data: stores } = await supabase
     .from('stores')

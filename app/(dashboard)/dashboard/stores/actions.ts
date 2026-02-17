@@ -28,7 +28,7 @@ export async function createStore(formData: FormData) {
     return { error: parsed.error.message };
   }
 
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user }
   } = await supabase.auth.getUser();

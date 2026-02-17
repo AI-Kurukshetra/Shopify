@@ -32,7 +32,7 @@ export async function createProduct(formData: FormData) {
     return { error: parsed.error.message };
   }
 
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { error } = await supabase.from('products').insert({
     store_id: parsed.data.store_id,
     name: parsed.data.name,
@@ -51,7 +51,7 @@ export async function createProduct(formData: FormData) {
 
 export async function deleteProduct(formData: FormData) {
   const productId = String(formData.get('product_id') ?? '');
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { error } = await supabase.from('products').delete().eq('id', productId);
 
   if (error) {

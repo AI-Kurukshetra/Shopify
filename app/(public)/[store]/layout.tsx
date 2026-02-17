@@ -8,7 +8,7 @@ export default async function StoreLayout({
   children: React.ReactNode;
   params: { store: string };
 }) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { data: store } = await supabase
     .from('stores')
     .select('id, name, slug')
